@@ -58,5 +58,16 @@ namespace MangoTime
                 FirstOrDefault(x => x.Name.ToLower().Contains(channelPrimaryContains)).
                 Users.FirstOrDefault(x => x.Username.ToLower().Contains(nameContains));
         }
+
+        internal static string CalculateMangoTime()
+        {
+            var timeOffset = Program.Config.MangoAppearances.First().TimeOffset;
+
+            DateTime mangoTime = DateTime.Now.ToLocalTime().AddHours(timeOffset.Hour).AddMinutes(timeOffset.Minute);
+
+            string mangoString = $"Current MangoTime is: {mangoTime.ToShortTimeString()} (Offset: {timeOffset.Hour}h {timeOffset.Minute}m)";
+
+            return mangoString;
+        }
     }
 }

@@ -29,6 +29,9 @@ namespace MangoTime
                 case "!mt":
                     await MangoTimeAsync(arg);
                     break;
+                case "!mangotime":
+                    await MangoTimeAsync(arg);
+                    break;
                 case "!randy":
                     await RandySavageAsync(arg);
                     break;
@@ -74,7 +77,7 @@ namespace MangoTime
 
         private static async Task MangoTimeAsync(SocketMessage arg)
         {
-            await arg.Channel.SendMessageAsync("MAAAANGOOO TIIIIIIIIIIIIME!!!!");
+            await arg.Channel.SendMessageAsync(MT.CalculateMangoTime());
         }
 
         private static async Task RandySavageAsync(SocketMessage arg)

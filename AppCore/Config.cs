@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using MangoTime.AppCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,19 +11,34 @@ namespace MangoTime
 {
     public class Config
     {
+        private List<MangoAppearance> _mangoAppearances { get; set; } = new List<MangoAppearance>();
         public string BotToken { get; set; }
         public string DirConfig { get; set; } = WTFile.GetConfigPath();
         public string ConfigFilePath { get; set; }
+        public List<MangoAppearance> MangoAppearances 
+        {
+            get
+            {
+                if (this._mangoAppearances.Count <= 0)
+                {
+                    _mangoAppearances.Add(new MangoAppearance
+                    {
+                        AppearanceTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 30, 00),
+                        RecordNumber = 1,
+                        TimeOffset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 30, 00)
+                    });
+                }
+                return this._mangoAppearances.OrderBy(x => x.AppearanceTime).ToList();
+            }
+            set
+            {
+                _mangoAppearances = value;
+            } 
+        }
 
         internal static bool LoadConfig()
         {
-            // Validate config directory and file exists
-            if (!WTFile.DirectoryExists(Program.Config.DirConfig))
-            {
-                Directory.CreateDirectory(Program.Config.DirConfig);
-                Program.Config.ConfigFilePath = $@"{Program.Config.DirConfig}\config.json";
-                return false;
-            }
+            // Validate current config path exists, otherwise set the default
             if (string.IsNullOrWhiteSpace(Program.Config.ConfigFilePath))
             {
                 Program.Config.ConfigFilePath = $@"{Program.Config.DirConfig}\config.json";
@@ -40,7 +57,6 @@ namespace MangoTime
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                Console.Read();
             }
             return true;
         }
@@ -55,7 +71,6 @@ namespace MangoTime
             catch (Exception ex)
             {
                 Console.WriteLine($"Config Save Failure: {ex.Message}");
-                Console.Read();
             }
         }
     }
