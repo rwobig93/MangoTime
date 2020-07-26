@@ -9,7 +9,7 @@ namespace MangoTime.AppCore
         public int RecordNumber { get; set; }
         public DateTime AppearanceTime { get; set; }
         public DateTime ScheduledTime { get; set; }
-        public DateTime TimeOffset { get; set; }
+        public TimeSpan TimeOffset { get; set; }
         public bool PlayedDarkSouls { get; set; } = false;
     }
 }

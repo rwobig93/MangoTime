@@ -1,5 +1,6 @@
 ﻿using Discord;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MangoTime
@@ -10,11 +11,15 @@ namespace MangoTime
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         public static Config Config { get; set; } = new Config();
+        public static BotClient Bot { get; set; }
 
         public async Task MainAsync()
         {
+            // Initialize Logger
+            MT.InitializeLogger();
+
             // Log startup
-            await Log("Starting bot", LogSeverity.Info);
+            await Events.Log("Starting bot", LogSeverity.Info);
 
             // Catch App Close and try to finish up, default timer is 3 seconds
             AppDomain.CurrentDomain.ProcessExit += Events.ConsoleClose;
@@ -23,81 +28,15 @@ namespace MangoTime
             Config.LoadConfig();
             MT.ValidateReqs();
 
-            // Start bot
-            await BotClient.StartBot();
+            // Initialize and Start bot
+            Bot = new BotClient();
+            await Bot.StartBot();
+
+            // Start timed jobs
+            MT.StartTimedJobs();
 
             // Block task until closed
-            await Task.Delay(-1);
-        }
-
-        public static Task Log(LogMessage msg)
-        {
-            try
-            {
-                switch (msg.Severity)
-                {
-                    case LogSeverity.Critical:
-                    case LogSeverity.Error:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        break;
-                    case LogSeverity.Warning:
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        break;
-                    case LogSeverity.Info:
-                        Console.ForegroundColor = ConsoleColor.White;
-                        break;
-                    case LogSeverity.Verbose:
-                    case LogSeverity.Debug:
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        break;
-                }
-                Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {msg.Message} {msg.Exception}");
-                Console.ResetColor();
-
-                //Serilog.Log.Logger.Information(msg.ToString());
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] EXCEPTION: {ex.Message}");
-                Console.ResetColor();
-            }
-            return Task.CompletedTask;
-        }
-
-        public static Task Log(string msg, LogSeverity logSeverity)
-        {
-            try
-            {
-                switch (logSeverity)
-                {
-                    case LogSeverity.Critical:
-                    case LogSeverity.Error:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        break;
-                    case LogSeverity.Warning:
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        break;
-                    case LogSeverity.Info:
-                        Console.ForegroundColor = ConsoleColor.White;
-                        break;
-                    case LogSeverity.Verbose:
-                    case LogSeverity.Debug:
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        break;
-                }
-                Console.WriteLine($"{DateTime.Now,-19} [{logSeverity,8}] ManualLog: {msg}");
-                Console.ResetColor();
-
-                //Serilog.Log.Logger.Information(msg);
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"{DateTime.Now,-19} [{logSeverity,8}] EXCEPTION: {ex.Message}");
-                Console.ResetColor();
-            }
-            return Task.CompletedTask;
+            await Task.Delay(Timeout.Infinite);
         }
     }
 }

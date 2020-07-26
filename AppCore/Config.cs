@@ -15,6 +15,7 @@ namespace MangoTime
         public string BotToken { get; set; }
         public string DirConfig { get; set; } = WTFile.GetConfigPath();
         public string ConfigFilePath { get; set; }
+        public DateTime ExpectedTime { get { return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 00, 00); } }
         public List<MangoAppearance> MangoAppearances 
         {
             get
@@ -25,7 +26,7 @@ namespace MangoTime
                     {
                         AppearanceTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 30, 00),
                         RecordNumber = 1,
-                        TimeOffset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 30, 00)
+                        TimeOffset = new TimeSpan(2,30,00)
                     });
                 }
                 return this._mangoAppearances.OrderBy(x => x.AppearanceTime).ToList();
@@ -56,7 +57,7 @@ namespace MangoTime
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Events.Log(ex.Message, Discord.LogSeverity.Critical);
             }
             return true;
         }
@@ -66,11 +67,11 @@ namespace MangoTime
             try
             {
                 File.WriteAllText(Program.Config.ConfigFilePath, JsonConvert.SerializeObject(Program.Config));
-                Console.WriteLine("Config saved successfully");
+                Events.Log("Config saved successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Config Save Failure: {ex.Message}");
+                Events.Log($"Config Save Failure: {ex.Message}", Discord.LogSeverity.Critical);
             }
         }
     }

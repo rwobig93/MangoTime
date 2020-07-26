@@ -1,52 +1,56 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static MangoTime.Events;
 
 namespace MangoTime
 {
     public class BotClient
     {
-        private static readonly DiscordSocketClient _botInstance = new DiscordSocketClient(new DiscordSocketConfig
+        private readonly DiscordSocketClient _botInstance = new DiscordSocketClient(new DiscordSocketConfig
         {
             LogLevel = Discord.LogSeverity.Info
         });
-        private static readonly CommandService _commands = new CommandService(new CommandServiceConfig
+        private readonly CommandService _commands = new CommandService(new CommandServiceConfig
                 {
                     LogLevel = Discord.LogSeverity.Info,
                     CaseSensitiveCommands = false
                 });
         private readonly IServiceProvider _services;
 
-        private BotClient()
+        public BotClient()
         {
-
+            // Initialize dependency injection
+            // _services = ConfigureServices();
         }
 
-        public static DiscordSocketClient Bot 
-        { 
-            get 
-            { 
-                return _botInstance; 
-            } 
-        }
+        public DiscordSocketClient Client { get { return _botInstance; } }
 
-        public static async Task StartBot()
+        public async Task StartBot()
         {
             try
             {
-                _botInstance.Log += Program.Log;
+                await Log("Running StartBot()", Discord.LogSeverity.Info);
+
+                // Assign bot client event handlers
+                _botInstance.Log += Log;
                 _botInstance.LoggedIn += Events.BotLoggedIn;
                 _botInstance.LoggedOut += Events.BotLoggedOut;
                 //_botInstance.MessageReceived += Events.MessageReceived;
 
-                await Program.Log("Running StartBot()", Discord.LogSeverity.Info);
+                // Initialize command service
+                _commands.Log += Log;
+                await InitializeCommands();
+
+                // Login and start bot client
                 await _botInstance.LoginAsync(Discord.TokenType.Bot, Program.Config.BotToken);
                 await _botInstance.StartAsync();
-                await Program.Log("Finished Auth and Start", Discord.LogSeverity.Info);
+                await Log("Finished Auth and Start", Discord.LogSeverity.Info);
             }
             catch (Exception ex)
             {
@@ -56,7 +60,15 @@ namespace MangoTime
 
         private async Task InitializeCommands()
         {
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            var handler = new CommandHandler(Client, _commands);
+            await handler.InstallCommandsAsync();
+        }
+
+        private static IServiceProvider ConfigureServices()
+        {
+            var map = new ServiceCollection();
+            // .AddSingleton(new InjectedServiceClass());
+            return map.BuildServiceProvider();
         }
 
         public static async Task<bool> VerifyToken(string token)
