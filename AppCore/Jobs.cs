@@ -24,7 +24,11 @@ namespace MangoTime.AppCore
             // If it isn't sunday, skip job
             if (DateTime.Now.ToLocalTime().DayOfWeek != DayOfWeek.Sunday)
             {
-                Log("We're not at the expected day yet, skipping job", Discord.LogSeverity.Debug);
+                return;
+            }
+            // If we have a mango appearance for today return
+            if (Program.Config.MangoAppearances.FindAll(x => x.AppearanceTime.Date == DateTime.Now.Date).Count >= 1)
+            {
                 return;
             }
             // If it isn't 2pm yet, skip job
