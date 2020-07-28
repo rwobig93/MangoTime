@@ -11,31 +11,11 @@ namespace MangoTime
 {
     public class Config
     {
-        private List<MangoAppearance> _mangoAppearances { get; set; } = new List<MangoAppearance>();
+        public List<MangoAppearance> MangoAppearances { get; set; } = new List<MangoAppearance>();
         public string BotToken { get; set; }
         public string DirConfig { get; set; } = WTFile.GetConfigPath();
         public string ConfigFilePath { get; set; }
         public DateTime ExpectedTime { get { return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 00, 00); } }
-        public List<MangoAppearance> MangoAppearances 
-        {
-            get
-            {
-                if (this._mangoAppearances.Count <= 0)
-                {
-                    _mangoAppearances.Add(new MangoAppearance
-                    {
-                        AppearanceTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 30, 00),
-                        RecordNumber = 1,
-                        TimeOffset = new TimeSpan(2,30,00)
-                    });
-                }
-                return this._mangoAppearances.OrderBy(x => x.AppearanceTime).ToList();
-            }
-            set
-            {
-                _mangoAppearances = value;
-            } 
-        }
 
         internal static bool LoadConfig()
         {

@@ -91,6 +91,22 @@ namespace MangoTime
             Log($"Added MangoAppearance: [{mangoAppearance.AppearanceTime}] [{mangoAppearance.ScheduledTime}] [{mangoAppearance.TimeOffset}]");
         }
 
+        internal static void AddMangoAppearanceTest()
+        {
+            Log("Starting AddMangoAppearanceTest()", LogSeverity.Debug);
+            for (int i = 1; i < 6; i++)
+            {
+                var mangoAppearance = new MangoAppearance
+                {
+                    AppearanceTime = DateTime.Now.ToLocalTime().AddHours(-i),
+                    TimeOffset = DateTime.Now.ToLocalTime().AddHours(-i) - Program.Config.ExpectedTime,
+                    ScheduledTime = Program.Config.ExpectedTime
+                };
+                Program.Config.MangoAppearances.Add(mangoAppearance);
+                Log($"Added Test MangoAppearance: [{mangoAppearance.AppearanceTime}] [{mangoAppearance.ScheduledTime}] [{mangoAppearance.TimeOffset}]", LogSeverity.Warning);
+            }
+        }
+
         internal static async void ValidateReqs()
         {
             if (string.IsNullOrWhiteSpace(Program.Config.BotToken))
@@ -107,6 +123,20 @@ namespace MangoTime
             else
             {
                 Console.WriteLine("Token valid, moving on");
+            }
+            ValidateMangoAppearanceMinimum();
+        }
+
+        private static void ValidateMangoAppearanceMinimum()
+        {
+            if (Program.Config.MangoAppearances.Count <= 0)
+            {
+                Program.Config.MangoAppearances.Add(new MangoAppearance
+                {
+                    AppearanceTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 30, 00),
+                    RecordNumber = 1,
+                    TimeOffset = new TimeSpan(2, 30, 00)
+                });
             }
         }
 
@@ -175,7 +205,7 @@ namespace MangoTime
 
         internal static string CalculateMangoTime()
         {
-            var timeOffset = Program.Config.MangoAppearances.First().TimeOffset;
+            var timeOffset = Program.Config.MangoAppearances.OrderByDescending(x => x.AppearanceTime).First().TimeOffset;
 
             DateTime mangoTime = DateTime.Now.ToLocalTime().AddHours(timeOffset.TotalHours);
 
