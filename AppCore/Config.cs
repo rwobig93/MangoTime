@@ -44,6 +44,11 @@ namespace MangoTime
             {
                 Program.Config.ConfigFilePath = $@"{Program.Config.DirConfig}\config.json";
             }
+            if (!WTFile.DirectoryExists(Program.Config.DirConfig))
+            {
+                Events.Log("Creating non-existant config directory");
+                Directory.CreateDirectory(Program.Config.DirConfig);
+            }
             if (!WTFile.FileExists(Program.Config.ConfigFilePath))
             {
                 return false;
