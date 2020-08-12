@@ -26,7 +26,7 @@ namespace MangoTime.AppCore
             var todayAppearances = Program.Config.MangoAppearances.FindAll(x => x.AppearanceTime.Date == DateTime.Now.Date);
 
             // If it isn't sunday, skip job
-            if (now.DayOfWeek != DayOfWeek.Wednesday) { return; }
+            if (now.DayOfWeek != DayOfWeek.Sunday) { return; }
 
             // If we have a mango appearance for today return
             if (todayAppearances.Count >= 1) { return; }
