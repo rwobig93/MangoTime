@@ -78,6 +78,62 @@ namespace MangoTime
             }
         }
 
+        internal static bool UserHasMobileLogin(string usernameContains)
+        {
+            // Grab Mango user
+            var user = GetUserContaining(usernameContains);
+
+            // Return Status or null if user wasn't found
+            if (null == user)
+            {
+                return false;
+            }
+            else
+            {
+                // If user doesn't have any active clients return false
+                if (user.ActiveClients.Count <= 0)
+                    return false;
+                // If user has 1 or more Mobile clients return true
+                else if (user.ActiveClients.ToList().FindAll(x => x == ClientType.Mobile).Count >= 1)
+                {
+                    return true;
+                }
+                // If user doesn't have 1 or more Mobile clients return false
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        internal static bool UserHasWebLogin(string usernameContains)
+        {
+            // Grab Mango user
+            var user = GetUserContaining(usernameContains);
+
+            // Return Status or null if user wasn't found
+            if (null == user)
+            {
+                return false;
+            }
+            else
+            {
+                // If user doesn't have any active clients return false
+                if (user.ActiveClients.Count <= 0)
+                    return false;
+                // If user has 1 or more Web clients return true
+                else if (user.ActiveClients.ToList().FindAll(x => x == ClientType.Web).Count >= 1)
+                {
+                    return true;
+                }
+                // If user doesn't have 1 or more Web clients return false
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         internal static void AddMangoAppearance()
         {
             Log("Starting AddMangoAppearance()", LogSeverity.Debug);
@@ -154,29 +210,20 @@ namespace MangoTime
             BackgroundWorker worker = new BackgroundWorker() { WorkerReportsProgress = true };
             worker.DoWork += (ws, we) =>
             {
-                do
+                while (true)
                 {
-                    // If it's sunday let's continue
-                    if (DateTime.Now.ToLocalTime().DayOfWeek == DayOfWeek.Sunday)
+                    try
                     {
-                        // If it isn't 2pm yet, skip job
-                        if (DateTime.Now.ToLocalTime().Hour < 14)
-                        {
-                            return;
-                        }
-                        // If it's past 7pm then let's skip job
-                        else if (DateTime.Now.ToLocalTime().Hour > 19)
-                        {
-                            return;
-                        }
-                        // If it's within our window check on mango
-                        else
-                        {
-                            Jobs.CheckOnMango();
-                        }
+                        // Sleep on startup to prevent exception for Bot not having full enumeration
+                        Thread.Sleep(TimeSpan.FromSeconds(30));
+                        Jobs.CheckOnMango();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"EXCEPTION: {ex.Message}{Environment.NewLine}{ex.StackTrace}", LogSeverity.Critical);
                     }
                     Thread.Sleep(TimeSpan.FromMinutes(1));
-                } while (true);
+                }
             };
             worker.RunWorkerAsync();
         }
@@ -209,7 +256,7 @@ namespace MangoTime
 
             DateTime mangoTime = DateTime.Now.ToLocalTime().AddHours(timeOffset.TotalHours);
 
-            string mangoString = $"Current MangoTime is: {mangoTime.ToShortTimeString()} (Offset: {timeOffset.TotalHours}h)";
+            string mangoString = $"Current MangoTime is: {mangoTime.ToShortTimeString()}{Environment.NewLine}(Offset: {timeOffset.Hours}h {timeOffset.Minutes}m {timeOffset.Seconds}s {timeOffset.Milliseconds}ms {timeOffset.Ticks}ticks)";
 
             return mangoString;
         }
