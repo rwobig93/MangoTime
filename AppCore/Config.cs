@@ -16,6 +16,9 @@ namespace MangoTime
         public string DirConfig { get; set; } = WTFile.GetConfigPath();
         public string ConfigFilePath { get; set; }
         public DateTime ExpectedTime { get { return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 00, 00); } }
+        public List<string> SusImages { get; set; } = Sus.DefaultSusList();
+        public TimeSpan SusTimer { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan SusPenalty { get; set; } = TimeSpan.FromSeconds(60);
 
         internal static bool LoadConfig()
         {

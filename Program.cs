@@ -8,15 +8,18 @@ namespace MangoTime
     public class Program
     {
         public static void Main(string[] args)
-            => new Program().MainAsync().GetAwaiter().GetResult();
+            => new Program().MainAsync(args).GetAwaiter().GetResult();
 
         public static Config Config { get; set; } = new Config();
         public static BotClient Bot { get; set; }
 
-        public async Task MainAsync()
+        public async Task MainAsync(string[] args)
         {
             // Initialize Logger
             MT.InitializeLogger();
+
+            // Validate launch args
+            MT.ParseLaunchArgs(args);
 
             // Log startup
             await Events.Log("Starting bot", LogSeverity.Info);

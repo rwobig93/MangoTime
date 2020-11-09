@@ -21,6 +21,17 @@ namespace MangoTime
         public static LoggingLevelSwitch LevelSwitch { get; private set; } = new LoggingLevelSwitch();
         public static Logger Logger { get; private set; }
 
+        internal static void ParseLaunchArgs(string[] args)
+        {
+            foreach (var arg in args)
+            {
+                if (arg.ToLower() == "-debug")
+                {
+                    // TO-DO: Set log level
+                }
+            }
+        }
+
         public static void InitializeLogger()
         {
             Logger = new LoggerConfiguration()
